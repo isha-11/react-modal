@@ -1,0 +1,20 @@
+.modal {
+  box-sizing: border-box;
+}
+
+.background {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgb(245, 222, 179, 0.5);
+}
+
+.content {
+  background-color: white;
+  padding: 1rem 2rem;
+}
