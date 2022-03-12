@@ -16,7 +16,11 @@ const ModalElement = ({ children }: { children: React.ReactNode }) => {
   const modalRef = useFocusTrap();
 
   return (
-    <div className="modal background" role={"dialog"}>
+    <div
+      className="modal background"
+      role={"dialog"}
+      {...preventEventPropagationProps}
+    >
       <div className="content" ref={modalRef}>
         {children}
       </div>
