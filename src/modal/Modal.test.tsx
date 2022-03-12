@@ -49,7 +49,11 @@ describe("Modal", () => {
 
   it.todo("should trap focus");
 
-  it.todo("should stop event leakage outside modal");
+  it.todo("should stop onClick event leakage outside modal");
+
+  it.todo("should stop tab keydown event leakage outside modal");
+
+  it.todo("should stop shift+tab keydown event leakage outside modal");
 
   it.todo(
     "should close on click of escape if corresponding prop is passed in such a way"

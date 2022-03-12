@@ -26,6 +26,7 @@ export const useFocusTrap = () => {
     const focusTrap = (event: KeyboardEvent) => {
       if (event.key === "Tab") {
         event.preventDefault();
+        event.stopImmediatePropagation();
 
         if (event.shiftKey) {
           currentFocusIdx =
