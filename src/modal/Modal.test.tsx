@@ -58,6 +58,8 @@ describe("Modal", () => {
   it.todo(
     "should not close on click of escape if corresponding prop is passed in such a way"
   );
+
+  it.todo("should focus triggering element on closing modal");
 });
 
 const getModal = () => screen.getByRole("dialog");

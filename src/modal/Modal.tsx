@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
 import { preventEventPropagationProps } from "../utils/preventEventPropagation";
 import { useFocusTrap } from "../utils/useFocusTrap";
+import { useRestoreTriggerFocus } from "../utils/useRestoreTriggerFocus";
 import "./Modal.css";
 
 interface ModalProps {
@@ -13,6 +13,7 @@ export const Modal = ({ children, isOpen }: ModalProps) => {
 };
 
 const ModalElement = ({ children }: { children: React.ReactNode }) => {
+  useRestoreTriggerFocus();
   const modalRef = useFocusTrap();
 
   return (

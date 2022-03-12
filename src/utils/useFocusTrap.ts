@@ -51,7 +51,7 @@ export const useFocusTrap = () => {
       }
     }
 
-    window.addEventListener("keydown", focusTrap);
+    ref.current.addEventListener("keydown", focusTrap);
     focusableElements.forEach((element) =>
       element.addEventListener("click", updateFocus)
     );
@@ -60,7 +60,7 @@ export const useFocusTrap = () => {
       focusableElements.forEach((element) =>
         element.removeEventListener("click", updateFocus)
       );
-      window.removeEventListener("keydown", focusTrap);
+      ref.current.removeEventListener("keydown", focusTrap);
     };
   }, [ref.current]);
 
