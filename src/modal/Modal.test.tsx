@@ -9,7 +9,7 @@ const ModalWithTrigger = () => {
     <>
       <button onClick={() => setShowModal(true)}>Open modal</button>
       <Modal isOpen={showModal}>
-        <text>Modal content</text>
+        <span>Modal content</span>
         <button>Modal button 1</button>
         <button>Modal button 2</button>
       </Modal>
@@ -38,6 +38,26 @@ describe("Modal", () => {
 
     within(getModal()).getByText("Modal content");
   });
+
+  it("should focus the first focusable element by default", () => {
+    renderAndOpenModal();
+
+    expect(
+      screen.getByRole("button", { name: "Modal button 1" })
+    ).toHaveFocus();
+  });
+
+  it.todo("should trap focus");
+
+  it.todo("should stop event leakage outside modal");
+
+  it.todo(
+    "should close on click of escape if corresponding prop is passed in such a way"
+  );
+
+  it.todo(
+    "should not close on click of escape if corresponding prop is passed in such a way"
+  );
 });
 
 const getModal = () => screen.getByRole("dialog");

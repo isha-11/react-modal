@@ -1,3 +1,6 @@
+import { useEffect, useRef } from "react";
+import { preventEventPropagationProps } from "../utils/preventEventPropagation";
+import { useFocusTrap } from "../utils/useFocusTrap";
 import "./Modal.css";
 
 interface ModalProps {
@@ -6,13 +9,17 @@ interface ModalProps {
 }
 
 export const Modal = ({ children, isOpen }: ModalProps) => {
+  return <>{isOpen && <ModalElement children={children} />}</>;
+};
+
+const ModalElement = ({ children }: { children: React.ReactNode }) => {
+  const modalRef = useFocusTrap();
+
   return (
-    <>
-      {isOpen && (
-        <div className="modal background">
-          <div className="content">{children}</div>
-        </div>
-      )}
-    </>
+    <div className="modal background" role={"dialog"}>
+      <div className="content" ref={modalRef}>
+        {children}
+      </div>
+    </div>
   );
 };
