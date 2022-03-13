@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { preventEventPropagationProps } from "../utils/preventEventPropagation";
 import { useFocusTrap } from "../utils/useFocusTrap";
 import { useRestoreTriggerFocus } from "../utils/useRestoreTriggerFocus";
@@ -8,15 +9,15 @@ interface ModalProps {
   isOpen: boolean;
 }
 
-export const Modal = ({ children, isOpen }: ModalProps) => {
-  return <>{isOpen && <ModalElement children={children} />}</>;
+export const Modal = ({ isOpen, ...otherProps }: ModalProps) => {
+  return <>{isOpen && <ModalElement {...otherProps} />}</>;
 };
 
-const ModalElement = ({ children }: { children: React.ReactNode }) => {
+const ModalElement = ({ children }: Omit<ModalProps, "isOpen">) => {
   useRestoreTriggerFocus();
   const modalRef = useFocusTrap();
 
-  return (
+  return createPortal(
     <div
       className="modal background"
       role={"dialog"}
@@ -25,6 +26,7 @@ const ModalElement = ({ children }: { children: React.ReactNode }) => {
       <div className="content" ref={modalRef}>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

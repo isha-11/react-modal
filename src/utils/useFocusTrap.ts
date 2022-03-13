@@ -6,6 +6,8 @@ import { RefObject, useEffect, useRef } from "react";
  */
 export const useFocusTrap = () => {
   const ref: RefObject<any> = useRef(null);
+  const isAutoFocused = useRef(false);
+  const currentFocusIdxRef = useRef(0); // is a ref because index shouldn't be reset on each effect rerun.
 
   useEffect(() => {
     if (!ref.current) {
@@ -20,46 +22,54 @@ export const useFocusTrap = () => {
       return;
     }
 
-    let currentFocusIdx = 0;
-    focusableElements[currentFocusIdx].focus();
+    const updateFocus = (element: Element | null) => {
+      const idx = focusableElements.indexOf(element);
+      if (idx !== -1) {
+        currentFocusIdxRef.current = idx;
+      }
+    };
+
+    updateFocus(document.activeElement);
+
+    // Should not auto focus in eventual reruns of effect if focus is already set once.
+    if (!isAutoFocused.current) {
+      focusableElements[currentFocusIdxRef.current].focus();
+      isAutoFocused.current = true;
+    }
 
     const focusTrap = (event: KeyboardEvent) => {
       if (event.key === "Tab") {
         event.preventDefault();
-        event.stopImmediatePropagation();
 
         if (event.shiftKey) {
-          currentFocusIdx =
-            currentFocusIdx === 0
+          currentFocusIdxRef.current =
+            currentFocusIdxRef.current === 0
               ? focusableElements.length - 1
-              : currentFocusIdx - 1;
+              : currentFocusIdxRef.current - 1;
         } else {
-          currentFocusIdx =
-            currentFocusIdx === focusableElements.length - 1
+          currentFocusIdxRef.current =
+            currentFocusIdxRef.current === focusableElements.length - 1
               ? 0
-              : currentFocusIdx + 1;
+              : currentFocusIdxRef.current + 1;
         }
 
-        focusableElements[currentFocusIdx].focus();
+        focusableElements[currentFocusIdxRef.current].focus();
       }
     };
 
     // Update current focus when user focuses an element manually using mouse click
-    function updateFocus(event: FocusEvent) {
-      const idx = focusableElements.indexOf(event.target);
-      if (idx !== -1) {
-        currentFocusIdx = idx;
-      }
-    }
+    const clickHandler = (event: MouseEvent) => {
+      event.target instanceof Element && updateFocus(event.target);
+    };
 
     ref.current.addEventListener("keydown", focusTrap);
     focusableElements.forEach((element) =>
-      element.addEventListener("click", updateFocus)
+      element.addEventListener("click", clickHandler)
     );
 
     return () => {
       focusableElements.forEach((element) =>
-        element.removeEventListener("click", updateFocus)
+        element.removeEventListener("click", clickHandler)
       );
       ref.current.removeEventListener("keydown", focusTrap);
     };

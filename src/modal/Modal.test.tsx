@@ -12,6 +12,7 @@ const ModalWithTrigger = () => {
         <span>Modal content</span>
         <button>Modal button 1</button>
         <button>Modal button 2</button>
+        <input aria-label="modalInput" />
       </Modal>
       <button>Button 2</button>
     </>
@@ -47,7 +48,25 @@ describe("Modal", () => {
     ).toHaveFocus();
   });
 
-  it.todo("should trap focus");
+  it("should trap focus", () => {
+    renderAndOpenModal();
+
+    userEvent.tab();
+    expect(
+      screen.getByRole("button", { name: "Modal button 2" })
+    ).toHaveFocus();
+
+    userEvent.tab();
+    expect(screen.getByLabelText("modalInput"));
+
+    userEvent.tab();
+    expect(
+      screen.getByRole("button", { name: "Modal button 1" })
+    ).toHaveFocus();
+
+    userEvent.tab({ shift: true });
+    expect(screen.getByLabelText("modalInput"));
+  });
 
   it.todo("should stop onClick event leakage outside modal");
 

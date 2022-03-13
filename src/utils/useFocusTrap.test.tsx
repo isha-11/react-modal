@@ -38,4 +38,8 @@ describe("useFocusTrap", () => {
   it.todo(
     "should not focus on natively non-focusable elements with positive tabIndex"
   );
+  it.todo("!isAutoFocused.current");
+  it.todo(
+    "should keep focus on current element in case focusable elements change"
+  );
 });
