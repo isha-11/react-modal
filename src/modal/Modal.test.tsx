@@ -3,24 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { Modal } from "./Modal";
 
-const ModalWithTrigger = () => {
-  const [showModal, setShowModal] = useState(false);
-  return (
-    <>
-      <button onClick={() => setShowModal(true)}>Open modal</button>
-      <Modal isOpen={showModal}>
-        <span>Modal content</span>
-        <button>Modal button 1</button>
-        <button>Modal button 2</button>
-        <input aria-label="modalInput" />
-      </Modal>
-      <button>Button 2</button>
-    </>
-  );
-};
-
-const renderModal = () => render(<ModalWithTrigger />);
-
 describe("Modal", () => {
   it("should not be displayed until triggered to be opened", () => {
     renderModal();
@@ -57,7 +39,7 @@ describe("Modal", () => {
     ).toHaveFocus();
 
     userEvent.tab();
-    expect(screen.getByLabelText("modalInput"));
+    expect(screen.getByLabelText("modalInput")).toBeInTheDocument();
 
     userEvent.tab();
     expect(
@@ -65,14 +47,29 @@ describe("Modal", () => {
     ).toHaveFocus();
 
     userEvent.tab({ shift: true });
-    expect(screen.getByLabelText("modalInput"));
+    expect(screen.getByLabelText("modalInput")).toBeInTheDocument();
   });
 
-  it.todo("should stop onClick event leakage outside modal");
+  it("should stop onClick event leakage (bubbling) outside modal", () => {
+    renderModalInButton();
+    // Direct button click - onClick should be executed
+    userEvent.click(screen.getByRole("button", { name: "Show Message" }));
+    screen.getByText("Button clicked");
+    userEvent.click(screen.getByRole("button", { name: "Show Message" })); // Hide message
 
-  it.todo("should stop tab keydown event leakage outside modal");
+    // Modal button click - onClick should not bubble to container button
+    userEvent.click(getOpenModalButton());
+    userEvent.click(screen.getByRole("button", { name: "Modal button 1" }));
+    expect(screen.queryByText("Button clicked")).not.toBeInTheDocument();
+  });
 
-  it.todo("should stop shift+tab keydown event leakage outside modal");
+  it.todo(
+    "should stop tab keydown event leakage outside modal when there is a modal inside a modal"
+  );
+
+  it.todo(
+    "should stop shift+tab keydown event leakage outside modal when there is a modal inside a modal"
+  );
 
   it.todo(
     "should close on click of escape if corresponding prop is passed in such a way"
@@ -85,6 +82,10 @@ describe("Modal", () => {
   it.todo("should focus triggering element on closing modal");
 });
 
+const renderModal = () => render(<ModalWithTrigger />);
+
+const renderModalInButton = () => render(<ModalInButton />);
+
 const getModal = () => screen.getByRole("dialog");
 
 const getOpenModalButton = () =>
@@ -95,3 +96,43 @@ const renderAndOpenModal = () => {
 
   userEvent.click(getOpenModalButton());
 };
+
+const ModalWithTrigger = () => {
+  const [showModal, setShowModal] = useState(false);
+  return (
+    <>
+      <button onClick={() => setShowModal(true)}>Open modal</button>
+      <Modal isOpen={showModal}>
+        <ModalContent />
+      </Modal>
+      <button>Button 2</button>
+    </>
+  );
+};
+
+const ModalInButton = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
+
+  return (
+    <>
+      <button onClick={() => setShowModal(true)}>Open modal</button>
+      <button onClick={() => setShowMessage(!showMessage)}>
+        Show Message
+        <Modal isOpen={showModal}>
+          <ModalContent />
+        </Modal>
+      </button>
+      {showMessage && <span>Button clicked</span>}
+    </>
+  );
+};
+
+const ModalContent = () => (
+  <>
+    <span>Modal content</span>
+    <button>Modal button 1</button>
+    <button>Modal button 2</button>
+    <input aria-label="modalInput" />
+  </>
+);
