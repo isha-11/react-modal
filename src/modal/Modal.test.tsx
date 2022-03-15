@@ -25,26 +25,22 @@ describe("Modal", () => {
   it("should focus the first focusable element by default", () => {
     renderAndOpenModal();
 
-    expect(
-      screen.getByRole("button", { name: "Modal button 1" })
-    ).toHaveFocus();
+    expect(getButton("Modal button 1")).toHaveFocus();
   });
 
   it("should trap focus", () => {
     renderAndOpenModal();
 
+    expect(getButton("Modal button 1")).toHaveFocus();
+
     userEvent.tab();
-    expect(
-      screen.getByRole("button", { name: "Modal button 2" })
-    ).toHaveFocus();
+    expect(getButton("Modal button 2")).toHaveFocus();
 
     userEvent.tab();
     expect(screen.getByLabelText("modalInput")).toBeInTheDocument();
 
     userEvent.tab();
-    expect(
-      screen.getByRole("button", { name: "Modal button 1" })
-    ).toHaveFocus();
+    expect(getButton("Modal button 1")).toHaveFocus();
 
     userEvent.tab({ shift: true });
     expect(screen.getByLabelText("modalInput")).toBeInTheDocument();
@@ -52,24 +48,67 @@ describe("Modal", () => {
 
   it("should stop onClick event leakage (bubbling) outside modal", () => {
     renderModalInButton();
+
     // Direct button click - onClick should be executed
-    userEvent.click(screen.getByRole("button", { name: "Show Message" }));
+    userEvent.click(getButton("Show Message"));
     screen.getByText("Button clicked");
-    userEvent.click(screen.getByRole("button", { name: "Show Message" })); // Hide message
+
+    // Hide message
+    userEvent.click(getButton("Show Message"));
 
     // Modal button click - onClick should not bubble to container button
     userEvent.click(getOpenModalButton());
-    userEvent.click(screen.getByRole("button", { name: "Modal button 1" }));
+    userEvent.click(getButton("Modal button 1"));
     expect(screen.queryByText("Button clicked")).not.toBeInTheDocument();
   });
 
-  it.todo(
-    "should stop tab keydown event leakage outside modal when there is a modal inside a modal"
-  );
+  it("should stop tab keydown event leakage outside modal when there is a modal inside a modal", () => {
+    renderModalInModal();
 
-  it.todo(
-    "should stop shift+tab keydown event leakage outside modal when there is a modal inside a modal"
-  );
+    userEvent.click(getOpenModalButton());
+
+    // BaseModal focus trap
+    expect(getButton("BaseModal button 1")).toHaveFocus();
+    userEvent.tab();
+    expect(getButton("BaseModal button 2")).toHaveFocus();
+    userEvent.tab();
+    expect(getButton("BaseModal button 1")).toHaveFocus();
+
+    userEvent.click(getButton("BaseModal button 1"));
+
+    // Modal focus trap
+    expect(getButton("Modal button 1")).toHaveFocus();
+    userEvent.tab();
+    expect(getButton("Modal button 2")).toHaveFocus();
+    userEvent.tab();
+    expect(screen.getByLabelText("modalInput")).toHaveFocus();
+    userEvent.tab();
+    expect(getButton("Modal button 1")).toHaveFocus();
+  });
+
+  it("should stop shift+tab keydown event leakage outside modal when there is a modal inside a modal", () => {
+    renderModalInModal();
+
+    userEvent.click(getOpenModalButton());
+
+    // BaseModal focus trap
+    expect(getButton("BaseModal button 1")).toHaveFocus();
+    userEvent.tab({ shift: true });
+    expect(getButton("BaseModal button 2")).toHaveFocus();
+    userEvent.tab({ shift: true });
+    expect(getButton("BaseModal button 1")).toHaveFocus();
+
+    userEvent.click(getButton("BaseModal button 1"));
+
+    // Modal focus trap
+    expect(getButton("Modal button 1")).toHaveFocus();
+    userEvent.tab({ shift: true });
+    expect(screen.getByLabelText("modalInput")).toHaveFocus();
+    userEvent.tab({ shift: true });
+    expect(getButton("Modal button 2")).toHaveFocus();
+    userEvent.tab({ shift: true });
+    expect(getButton("Modal button 1")).toHaveFocus();
+  });
 
   it.todo(
     "should close on click of escape if corresponding prop is passed in such a way"
@@ -83,8 +122,8 @@ describe("Modal", () => {
 });
 
 const renderModal = () => render(<ModalWithTrigger />);
-
 const renderModalInButton = () => render(<ModalInButton />);
+const renderModalInModal = () => render(<ModalInModal />);
 
 const getModal = () => screen.getByRole("dialog");
 
@@ -96,6 +135,8 @@ const renderAndOpenModal = () => {
 
   userEvent.click(getOpenModalButton());
 };
+
+const getButton = (name: string) => screen.getByRole("button", { name });
 
 const ModalWithTrigger = () => {
   const [showModal, setShowModal] = useState(false);
@@ -124,6 +165,24 @@ const ModalInButton = () => {
         </Modal>
       </button>
       {showMessage && <span>Button clicked</span>}
+    </>
+  );
+};
+
+const ModalInModal = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [showModal2, setShowModal2] = useState(false);
+
+  return (
+    <>
+      <button onClick={() => setShowModal(true)}>Open modal</button>
+      <Modal isOpen={showModal}>
+        <button onClick={() => setShowModal2(true)}>BaseModal button 1</button>
+        <button>BaseModal button 2</button>
+        <Modal isOpen={showModal2}>
+          <ModalContent />
+        </Modal>
+      </Modal>
     </>
   );
 };
