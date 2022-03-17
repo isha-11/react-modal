@@ -1,5 +1,5 @@
 {
-  "short_name": "modal",
+  "short_name": "react-modal",
   "name": "React Modal",
   "start_url": ".",
   "display": "standalone",
