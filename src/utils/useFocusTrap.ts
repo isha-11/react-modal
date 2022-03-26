@@ -10,12 +10,13 @@ export const useFocusTrap = () => {
   const currentFocusIdxRef = useRef(0); // is a ref because index shouldn't be reset on each effect rerun.
 
   useEffect(() => {
-    if (!ref.current) {
+    const containerRef = ref.current;
+    if (!containerRef) {
       return;
     }
 
     const focusableElements = [
-      ...ref.current.querySelectorAll(focusableElementsList),
+      ...containerRef.querySelectorAll(focusableElementsList),
     ];
 
     if (focusableElements.length === 0) {
@@ -62,7 +63,7 @@ export const useFocusTrap = () => {
       event.target instanceof Element && updateFocus(event.target);
     };
 
-    ref.current.addEventListener("keydown", focusTrap);
+    containerRef.addEventListener("keydown", focusTrap);
     focusableElements.forEach((element) =>
       element.addEventListener("click", clickHandler)
     );
@@ -71,9 +72,9 @@ export const useFocusTrap = () => {
       focusableElements.forEach((element) =>
         element.removeEventListener("click", clickHandler)
       );
-      ref.current.removeEventListener("keydown", focusTrap);
+      containerRef.removeEventListener("keydown", focusTrap);
     };
-  }, [ref.current]);
+  }, []);
 
   return ref;
 };

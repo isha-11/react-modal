@@ -12,5 +12,5 @@ export const useRestoreTriggerFocus = () => {
         lastActiveElement.focus();
       }
     };
-  }, []);
+  }, [lastActiveElement]);
 };
